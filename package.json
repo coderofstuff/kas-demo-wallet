@@ -1,0 +1,16 @@
+{
+  "name": "test-wallet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@kaspa/grpc-node": "^1.0.8",
+    "@kaspa/wallet": "^1.4.24",
+    "axios": "^1.4.0"
+  }
+}
