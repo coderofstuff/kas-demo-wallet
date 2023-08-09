@@ -1,5 +1,5 @@
 const { initKaspaFramework } = require('@kaspa/wallet');
-const { PrivateKey, Transaction, crypto } = require('@kaspa/core-lib');
+const { PrivateKey, PublicKey, Transaction, crypto } = require('@kaspa/core-lib');
 const axios = require('axios');
 
 async function run() {
@@ -7,6 +7,22 @@ async function run() {
     // From BIP 0340
     const sk = new PrivateKey('B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF');
     const pk = sk.toPublicKey();
+
+    // Returns the x-coord hex representation of the public key
+    console.info(pk.toString());
+    console.info(pk.toObject());
+
+    // If you only have the X-coord, prepend it with either '02' if Y-coord is even, '03' if Y-coord is odd
+    // This section is intended to demonstrate creating public keys:
+    const xCoordHex = pk.toObject().x;
+    const yCoordHex = pk.toObject().y;
+    const fullDERRepresentation = '04' + xCoordHex + yCoordHex;
+    console.info(pk.toString() === xCoordHex);
+    console.info(new PublicKey('02' + xCoordHex).toObject()); // Y valye is correct
+    console.info(new PublicKey('03' + xCoordHex).toObject()); // Y value is incorrect
+    console.info(new PublicKey(fullDERRepresentation).toString());
+    console.info(PublicKey.fromX(false, xCoordHex).toString());
+    console.info(PublicKey.fromX(true, xCoordHex).toString());
 
     const kaspaAddress = pk.toAddress('kaspa').toCashAddress(); // Should be kaspa:qr0lr4ml9fn3chekrqmjdkergxl93l4wrk3dankcgvjq776s9wn9jkdskewva
 
