@@ -4,6 +4,13 @@ const axios = require('axios');
 
 async function run() {
     await initKaspaFramework();
+
+    const randomSecretKey = new PrivateKey();
+    console.info('randomSecretKey\t\t\t\t\t\t\t', randomSecretKey.toString());
+    console.info('randomSecretKey.toAddress("kaspa")\t\t\t\t', randomSecretKey.toAddress('kaspa').toString());
+    console.info('randomSecretKey.toPublicKey().toString()\t\t\t', randomSecretKey.toPublicKey().toString());
+    console.info('randomSecretKey.toPublicKey().toAddress("kaspa").toString()\t', randomSecretKey.toPublicKey().toAddress('kaspa').toString());
+
     // From BIP 0340
     const sk = new PrivateKey('B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF');
     const pk = sk.toPublicKey();
