@@ -1,5 +1,5 @@
 const { initKaspaFramework } = require('@kaspa/wallet');
-const { PrivateKey, PublicKey, Transaction, crypto } = require('@kaspa/core-lib');
+const { PrivateKey, PublicKey, Transaction, crypto, Script } = require('@kaspa/core-lib');
 const axios = require('axios');
 
 async function run() {
@@ -33,6 +33,8 @@ async function run() {
 
     const kaspaAddress = pk.toAddress('kaspa').toCashAddress(); // Should be kaspa:qr0lr4ml9fn3chekrqmjdkergxl93l4wrk3dankcgvjq776s9wn9jkdskewva
 
+    console.info('Script Public Key from Address', new Script(pk.toAddress('kaspa')).toBuffer().toString('hex'));
+
     console.info(kaspaAddress);
 
     console.info('--- Getting UTXOs from API');
@@ -53,7 +55,7 @@ async function run() {
       script: utxos[0].utxoEntry.scriptPublicKey.scriptPublicKey,
       sequenceNumber: 0,
       output: new Transaction.Output({
-        script: utxos[0].utxoEntry.scriptPublicKey.scriptPublicKey,
+        script: new Script(pk.toAddress('kaspa')).toBuffer().toString('hex'),
         satoshis: Number(utxos[0].utxoEntry.amount),
       })
     });
