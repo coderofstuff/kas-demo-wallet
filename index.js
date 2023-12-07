@@ -45,8 +45,19 @@ async function run() {
     const { data: utxos } = await axios.get(`https://api.kaspa.org/addresses/${kaspaAddress}/utxos`);
     console.info(utxos);
 
-    if (utxos.length === 0) {
-        console.info('Send some kaspa to', kaspaAddress, 'before proceeding with the demo');
+    let selectedUtxo = null;
+
+    for (const utxo of utxos) {
+        // We need to work with at least 0.001 KAS
+        if (utxo.utxoEntry.amount >= 100000) {
+            //
+            selectedUtxo = utxo;
+            break;
+        }
+    }
+    
+    if (!selectedUtxo) {
+        console.info('Send at least 0.001 kaspa to', kaspaAddress, 'before proceeding with the demo');
         return;
     }
 
@@ -54,24 +65,35 @@ async function run() {
     tx.setVersion(0); // Very important!
 
     const txInput = new Transaction.Input.PublicKey({
-      prevTxId: utxos[0].outpoint.transactionId,
-      outputIndex: utxos[0].outpoint.index,
-      script: utxos[0].utxoEntry.scriptPublicKey.scriptPublicKey,
+      prevTxId: selectedUtxo.outpoint.transactionId,
+      outputIndex: selectedUtxo.outpoint.index,
+      script: selectedUtxo.utxoEntry.scriptPublicKey.scriptPublicKey,
       sequenceNumber: 0,
       output: new Transaction.Output({
-        script: new Script(new Address(kaspaAddress)).toBuffer().toString('hex'),
-        satoshis: Number(utxos[0].utxoEntry.amount),
+        script: selectedUtxo.utxoEntry.scriptPublicKey.scriptPublicKey,
+        satoshis: Number(selectedUtxo.utxoEntry.amount),
       })
     });
 
+    const fee = 3000; // Assume 0.00003 KAS is the tx fee
+    const amountToSend = Math.round(Number(selectedUtxo.utxoEntry.amount) / 2);
+    const amountAsChange = Number(selectedUtxo.utxoEntry.amount) - amountToSend - fee;
+
     const txOutput = new Transaction.Output({
-        script: utxos[0].utxoEntry.scriptPublicKey.scriptPublicKey,
-        satoshis: Number(utxos[0].utxoEntry.amount) - 3000, // Assume 0.00003 KAS is the tx fee
+        script: new Script(new Address(kaspaAddress)).toBuffer().toString('hex'),
+        satoshis: amountToSend,
+    });
+
+    const txChange = new Transaction.Output({
+        script: new Script(new Address(kaspaAddress)).toBuffer().toString('hex'),
+        satoshis: amountAsChange,
     });
 
     // Add my inputs and outputs
     tx.addInput(txInput);
     tx.addOutput(txOutput);
+    // This change is so you change the excess amount to yourself
+    tx.addOutput(txChange);
 
     // Manually call the signing for the one input. You need to call this for each input:
     console.info('---- Applying signatures');
@@ -99,11 +121,18 @@ async function run() {
           "inputs": signedInputs,
           "outputs": [
             {
-              "amount": txOutput.satoshis,
+              "amount": amountToSend,
               "scriptPublicKey": {
                 "version": 0,
                 "scriptPublicKey": txOutput.script.toBuffer().toString('hex'),
               }
+            },
+            {
+                "amount": amountAsChange,
+                "scriptPublicKey": {
+                  "version": 0,
+                  "scriptPublicKey": txChange.script.toBuffer().toString('hex'),
+                }
             }
           ],
           "lockTime": 0,
