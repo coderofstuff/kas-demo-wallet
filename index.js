@@ -40,7 +40,7 @@ async function run() {
     console.info('Script Public Key from Address (via string)\t\t', new Script(new Address(kaspaAddress)).toBuffer().toString('hex'));
     console.info('Script Public Key from ECDSA Address (via string)\t', new Script(new Address('kaspa:qypdtlw845g6vhgtheug9lpahjgmtpsarqkueeul0sd7t07npfnhe4s7fd82n0v')).toBuffer().toString('hex'));
     console.info('Script Public Key of devfund (example p2sh address)\t', new Script(new Address('kaspa:precqv0krj3r6uyyfa36ga7s0u9jct0v4wg8ctsfde2gkrsgwgw8jgxfzfc98')).toBuffer().toString('hex'));
-  return;
+
     console.info('--- Getting UTXOs from API');
     const { data: utxos } = await axios.get(`https://api.kaspa.org/addresses/${kaspaAddress}/utxos`);
     console.info(utxos);
