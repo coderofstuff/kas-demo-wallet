@@ -1,5 +1,5 @@
 const { initKaspaFramework } = require('@kaspa/wallet');
-const { PrivateKey, PublicKey, Transaction, crypto, Script } = require('@kaspa/core-lib');
+const { PrivateKey, PublicKey, Address, Transaction, crypto, Script } = require('@kaspa/core-lib');
 const axios = require('axios');
 
 async function run() {
@@ -33,7 +33,8 @@ async function run() {
 
     const kaspaAddress = pk.toAddress('kaspa').toCashAddress(); // Should be kaspa:qr0lr4ml9fn3chekrqmjdkergxl93l4wrk3dankcgvjq776s9wn9jkdskewva
 
-    console.info('Script Public Key from Address', new Script(pk.toAddress('kaspa')).toBuffer().toString('hex'));
+    console.info('Script Public Key from Address (via pk)', new Script(pk.toAddress('kaspa')).toBuffer().toString('hex'));
+    console.info('Script Public Key from Address (via string)', new Script(new Address(kaspaAddress)).toBuffer().toString('hex'));
 
     console.info(kaspaAddress);
 
@@ -55,7 +56,7 @@ async function run() {
       script: utxos[0].utxoEntry.scriptPublicKey.scriptPublicKey,
       sequenceNumber: 0,
       output: new Transaction.Output({
-        script: new Script(pk.toAddress('kaspa')).toBuffer().toString('hex'),
+        script: new Script(new Address(kaspaAddress)).toBuffer().toString('hex'),
         satoshis: Number(utxos[0].utxoEntry.amount),
       })
     });
